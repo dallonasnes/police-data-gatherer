@@ -19,4 +19,4 @@ Police complaint data: (REST API) `https://api.cpdp.co/api/v2/officers/top-by-al
 Police misconduct settlement data: `https://projects.chicagoreporter.com/settlements/search/officers`
 
 ## Deploy
-The `Procfile` instructs Heroku on how to start server. Heroku redeploys on every merge into `master` branch. Endpoint lives at `police-data-gatherer.heroku.com`
+The `Procfile` instructs Heroku on how to start server. Heroku redeploys on every merge into `master` branch. Endpoint lives at `police-data-gatherer.herokuapp.com`
