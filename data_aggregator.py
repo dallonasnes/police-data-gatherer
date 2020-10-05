@@ -1,5 +1,6 @@
 import os
 import pickle
+import json
 
 import requests
 
@@ -7,6 +8,7 @@ from cop import Cop
 from scraper import scrape_police_misconduct_data, COPS_PICKLE_FILEPATH
 
 COPS_WITH_DATA_PICKLE_FILEPATH = "cops_with_data.pickle"
+COPS_ALLEGATION_DATA_LIST = "cops_by_allegation.json"
 
 class Data():
     def __init__(self):
@@ -14,19 +16,17 @@ class Data():
         with open(COPS_PICKLE_FILEPATH, "rb") as handle:
             self.cops = pickle.load(handle)
         
-        #TODO: parse all cops, not just the top ones...I don't see an endpoint for "all cops by allegations" so perhaps i need to scrape it?
-        self.top_officers_by_allegation_endpoint = "https://api.cpdp.co/api/v2/officers/top-by-allegation/"
+        with open(COPS_ALLEGATION_DATA_LIST, "r") as handle:
+            self.officer_allegation_data_list = json.loads(handle.read())["officers"]
+        self.officer_allegation_data = {}
 
     def scrape_police_misconduct_settlement_data(self):
         scrape_police_misconduct_data()
 
     def get_officer_allegation_data(self):
-        officer_allegation_data_list = requests.get(self.top_officers_by_allegation_endpoint).json()
-
-        self.officer_allegation_data = {}
-        for cop in officer_allegation_data_list:
-            name = cop['full_name'].upper()
-            count = int(cop['complaint_count'])
+        for cop in self.officer_allegation_data_list:
+            name = cop['officer_first'].upper() + " " + cop['officer_last'].upper()
+            count = int(cop['allegations_count'])
             self.officer_allegation_data[name] = count
 
     def get_cops_with_payment_and_complaint_data(self):
