@@ -23,8 +23,9 @@ def cops():
 
 @app.get('/cops/{start_idx}/{count}')
 def cops_subset(start_idx: int, count: int):
-    if start_idx + count < len(cops_with_data):
-        return json.dumps(cops_with_data[start_idx:start_idx + count])
+    end_idx = start_idx + count
+    if end_idx < len(cops_with_data):
+        return json.dumps(cops_with_data[start_idx:end_idx])
     elif start_idx < len(cops_with_data):
         return json.dumps(cops_with_data[start_idx:])
     else:
