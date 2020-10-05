@@ -25,7 +25,7 @@ class Data():
 
     def get_officer_allegation_data(self):
         for cop in self.officer_allegation_data_list:
-            name = cop['officer_first'].upper() + " " + cop['officer_last'].upper()
+            name = (cop['officer_first'] + " " + cop['officer_last']).upper()
             count = int(cop['allegations_count'])
             self.officer_allegation_data[name] = count
 
