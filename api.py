@@ -3,6 +3,7 @@ import pickle
 from typing import List
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.encoders import jsonable_encoder
 
 from cop import Cop
@@ -20,14 +21,18 @@ def read_root():
 
 @app.get('/cops')
 def cops():
-    return jsonable_encoder(cops_with_data)
+    cops_with_data_as_json = jsonable_encoder(cops_with_data)
+    return {"cops": cops_with_data_as_json}
 
 @app.get('/cops/{start_idx}/{count}')
 def cops_subset(start_idx: int, count: int):
+    response = {"cops": []}
     end_idx = start_idx + count
     if end_idx < len(cops_with_data):
-        return jsonable_encoder(cops_with_data[start_idx:end_idx])
+        response["cops"] = jsonable_encoder(cops_with_data[start_idx:end_idx])
+        return response
     elif start_idx < len(cops_with_data):
-        return jsonable_encoder(cops_with_data[start_idx:])
+        response["cops"] = jsonable_encoder(cops_with_data[start_idx:])
+        return response
     else:
         raise HTTPException(status_code=404, detail="start_idx out of range")

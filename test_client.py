@@ -15,7 +15,7 @@ def test_read_root():
 def test_read_all_cops():
     response = client.get("/cops")
     assert response.status_code == 200
-    cops: List[Dict] = response.json()
+    cops: List[Dict] = response.json()["cops"]
     assert len(cops) > 0
     #every cop in this list should have a non-zero complaint count
     for cop in cops:
@@ -29,7 +29,7 @@ def test_read_subset_cops():
     count = 10
     response = client.get("/cops/0/" + str(count))
     assert response.status_code == 200
-    assert len(response.json()) == count
+    assert len(response.json()["cops"]) == count
 
 def test_read_subset_cops_validate_math():
     responseA = client.get("/cops/0/10")
@@ -37,7 +37,7 @@ def test_read_subset_cops_validate_math():
     responseC = client.get("/cops/0/20")
 
     #assert that content of responseA + responseB == responseC
-    assert responseA.json() + responseB.json() == responseC.json()
+    assert responseA.json()["cops"] + responseB.json()["cops"] == responseC.json()["cops"]
 
 def test_read_subset_cops_no_count_specified_should_fail():
     response = client.get("/cops/5")
