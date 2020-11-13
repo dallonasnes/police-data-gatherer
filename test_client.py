@@ -17,8 +17,10 @@ def test_read_all_cops():
     cops: List[Dict] = response.json()["cops"]
     assert len(cops) > 0
     #every cop in this list should have a non-zero complaint count
+    #and be active (according to cpdp data)
     for cop in cops:
         assert cop['complaint_count'] > 0
+        assert cop['is_active']
 
     #assert cops are in descending order by total payments
     for idx in range(len(cops) - 1):

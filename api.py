@@ -16,7 +16,7 @@ templates = Jinja2Templates(directory="templates")
 
 #read pickled data into memory as a singleton
 with open(COPS_WITH_DATA_PICKLE_FILEPATH, "rb") as handle:
-    cops_with_data: List[Cop] = [cop.get_dict() for cop in pickle.load(handle)]
+    cops_with_data: List[Cop] = [cop.get_dict() for cop in pickle.load(handle) if cop.is_active]
 
 @app.get('/', response_class=HTMLResponse)
 async def read_root(request: Request):
