@@ -10,7 +10,6 @@ client = TestClient(app)
 def test_read_root():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"Hello": "World"}
 
 def test_read_all_cops():
     response = client.get("/cops")
@@ -18,12 +17,14 @@ def test_read_all_cops():
     cops: List[Dict] = response.json()["cops"]
     assert len(cops) > 0
     #every cop in this list should have a non-zero complaint count
+    #and be active (according to cpdp data)
     for cop in cops:
         assert cop['complaint_count'] > 0
+        assert cop['is_active']
 
     #assert cops are in descending order by total payments
     for idx in range(len(cops) - 1):
-        assert cops[idx]['total_payments'] >= cops[idx]['total_payments']
+        assert cops[idx]['total_payments'] >= cops[idx+1]['total_payments']
 
 def test_read_subset_cops():
     count = 10
