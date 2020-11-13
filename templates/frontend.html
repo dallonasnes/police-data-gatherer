@@ -4,7 +4,7 @@
 </head>
 <body>
     {% for cop in cops_with_data %}
-        <li>{{ cop.name }} is an active {{cop.role}} against whom {{cop.complaint_count}} complaints have been recorded, according to <a href="https://cpdp.co">CPDP</a> investigations
+        <li>{{ cop.name }} is an active {{cop.role}} against whom {{cop.complaint_count}} complaints have been recorded, according to <a href={{cop.complaint_page_url}}>CPDP</a> investigations
         <br> and they have been named in misconduct settlements costing taxpayers {{"${:,.0f}".format(cop.total_payments)}}, according to <a href={{cop.page_url}}>Chicago Reporter</a> investigations
     {% endfor %}
 </body>

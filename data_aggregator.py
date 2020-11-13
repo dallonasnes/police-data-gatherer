@@ -26,8 +26,12 @@ class Data():
     def get_officer_allegation_data(self):
         for cop in self.officer_allegation_data_list:
             name = (cop['officer_first'] + " " + cop['officer_last']).upper()
-            count = int(cop['allegations_count'])
-            self.officer_allegation_data[name] = count
+            cop_details = {
+                "count": int(cop['allegations_count']),
+                "active": cop["active"] == "Yes",
+                "absolute_url": cop["absolute_url"]
+            }
+            self.officer_allegation_data[name] = cop_details
 
     def get_cops_with_payment_and_complaint_data(self):
         cops_with_payment_data = set([cop.name for cop in self.cops])
@@ -37,11 +41,12 @@ class Data():
         for cop in self.cops:
             name = cop.name.upper()
             if name in cops_names_with_payment_and_complaint_data:
-                cop.set_complaint_count(self.officer_allegation_data[name])
+                cop_details = self.officer_allegation_data[name]
+                cop.set_complaint_count(cop_details["count"])
+                cpdp_active_status = cop_details["active"]
+                cop.set_is_active(cpdp_active_status if cpdp_active_status == cop.is_active else False)
+                cop.set_complaint_page_url("cpdp.co" + cop_details["absolute_url"])
                 self.cops_with_payment_and_complaint_data.append(cop)
-        
-        for cop in self.cops_with_payment_and_complaint_data:
-            assert cop.has_complaint_count()
 
         #sort from highest to lowest misconduct payouts
         self.cops_with_payment_and_complaint_data = sorted(self.cops_with_payment_and_complaint_data, key= lambda cop: int(cop.total_payments), reverse=True)
