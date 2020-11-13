@@ -1,0 +1,11 @@
+<html>
+<head>
+    <title>Chicago Police Data</title>
+</head>
+<body>
+    {% for cop in cops_with_data %}
+        <li>{{ cop.name }} as {{cop.role}} received {{cop.complaint_count}} complaints and cost {{"${:,.0f}".format(cop.total_payments)}} in misconduct settlements</li>
+        <li><a href={{cop.page_url}}>Click here for full misconduct profile</a></li>
+    {% endfor %}
+</body>
+</html>

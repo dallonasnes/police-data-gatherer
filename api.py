@@ -2,22 +2,25 @@ import json
 import pickle
 from typing import List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.templating import Jinja2Templates
 
 from cop import Cop
 from data_aggregator import COPS_WITH_DATA_PICKLE_FILEPATH
 
 app = FastAPI()
 
+templates = Jinja2Templates(directory="templates")
+
 #read pickled data into memory as a singleton
 with open(COPS_WITH_DATA_PICKLE_FILEPATH, "rb") as handle:
     cops_with_data: List[Cop] = [cop.get_dict() for cop in pickle.load(handle)]
 
-@app.get('/')
-def read_root():
-    return {"Hello": "World"}
+@app.get('/', response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("frontend.html", {"request": request, "cops_with_data": cops_with_data})
 
 @app.get('/cops')
 def cops():
