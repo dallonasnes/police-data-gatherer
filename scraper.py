@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 
 from cop import Cop
 
-COPS_PICKLE_FILEPATH = "cops.pickle"
+COPS_PICKLE_FILEPATH = "data/cops.pickle"
 
 def scrape_police_misconduct_data():
     scraper = PoliceMisconductDataScraper()

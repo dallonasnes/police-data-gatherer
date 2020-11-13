@@ -7,8 +7,8 @@ import requests
 from cop import Cop
 from scraper import scrape_police_misconduct_data, COPS_PICKLE_FILEPATH
 
-COPS_WITH_DATA_PICKLE_FILEPATH = "cops_with_data.pickle"
-COPS_ALLEGATION_DATA_LIST = "cops_by_allegation.json"
+COPS_WITH_DATA_PICKLE_FILEPATH = "data/cops_with_data.pickle"
+COPS_ALLEGATION_DATA_LIST = "data/cops_by_allegation.json"
 
 class Data():
     def __init__(self):
