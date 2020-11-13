@@ -8,6 +8,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
+from webdriver_manager.chrome import ChromeDriverManager
+
 from cop import Cop
 
 COPS_PICKLE_FILEPATH = "data/cops.pickle"
@@ -15,7 +17,8 @@ COPS_PICKLE_FILEPATH = "data/cops.pickle"
 def scrape_police_misconduct_data():
     scraper = PoliceMisconductDataScraper()
     try:
-        scraper.scrape()
+        scraper.scrape_cops()
+        scraper.scrape_active_status()
         scraper.write_pickle()
     
     except Exception as ex:
@@ -29,11 +32,11 @@ class PoliceMisconductDataScraper():
         self.output_file = COPS_PICKLE_FILEPATH
         self.url = "https://projects.chicagoreporter.com/settlements/search/officers"
         options = Options()
-        options.add_argument('--headless')
-        self.driver = webdriver.Chrome(options=options)
+        #options.add_argument('--headless')
+        self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         self.wait = WebDriverWait(self.driver, 5)
     
-    def scrape(self):
+    def scrape_cops(self):
         self.driver.get(self.url)
         sleep(1)
         self.driver.find_element_by_xpath('/html/body/div[5]/div/div[2]').click()
@@ -48,8 +51,17 @@ class PoliceMisconductDataScraper():
             name = details[0]
             role = details[1]
             total_payments = int(details[2].split(' ')[0].split('$')[1].replace(',', ''))
-            
+
             self.cops.append(Cop(name.upper(), role.upper(), total_payments, page_url))
+    
+    def scrape_active_status(self):
+        for cop in self.cops:
+            #go to specific page to find active status
+            #TODO: move this into a separate block to avoid stale reference error
+            # but will need to ensure that I add the is_active prop to the correct cop element
+            self.driver.get(cop.page_url)
+            length_of_service_text = self.driver.find_element_by_class_name('years-of-service').text
+            cop.set_is_active('(active)' in length_of_service_text)
 
     def write_pickle(self):
         with open(self.output_file, "wb") as handle:
