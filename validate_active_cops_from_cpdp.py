@@ -45,28 +45,48 @@ class PoliceAllegationDataScraper():
             self.active_officer_allegation_data_list = list(filter(
                                                             lambda cop: cop["active"] == "Yes",
                                                             all_officer_allegation_data_list
-                                                        ))
+            ))
         
         options = Options()
         options.add_argument('--headless')
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
-        self.wait = WebDriverWait(self.driver, 2)
     
     def update_allegation_data(self):
-        for cop in self.active_officer_allegation_data_list:
+        #using a while loop to retry cops that hit a timeout during the get request
+        i = 0
+        stuckCounter = 0 #skip one if we're stuck at a single row forever
+        while i < len(self.active_officer_allegation_data_list):
+            cop = self.active_officer_allegation_data_list[i]
             self.driver.get(self.host + cop["absolute_url"])
-            sleep(2)
+            try:
+                element = WebDriverWait(self.driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH, '//*[@id="root"]/div/div[1]/div/div[2]/div[2]/div[8]/div/span[1]'))
+                )
+            except:
+                #my wifi is bad, so timeouts are inconsistent
+                #so to handle the exception, just make the request again and sleep for a bit
+                self.driver.get(self.host + cop["absolute_url"])
+                sleep(10)
+            try:
+                career_span = self.driver.find_elements_by_class_name('summary-field-value')[-1].text
+                is_active = 'Present' in career_span
 
-            career_span = self.driver.find_elements_by_class_name('summary-field-value')[-1].text
-            is_active = 'Present' in career_span
+                #if not active, then we don't need to update allegations info
+                if not is_active:
+                    cop["active"] = "No"
+                    continue
 
-            #if not active, then we don't need to update allegations info
-            if not is_active:
-                cop["active"] = "No"
-                continue
-
-            allegations_count = int(self.driver.find_elements_by_class_name('metrics-pane-value')[0].text)
-            cop["allegations_count"] = allegations_count
+                allegations_count = int(self.driver.find_elements_by_class_name('metrics-pane-value')[0].text)
+                cop["allegations_count"] = allegations_count
+                i += 1
+                stuckCounter = 0
+            except:
+                stuckCounter += 1
+                if stuckCounter == 10:
+                    print("STUCK at url:", self.host + cop["absolute_url"])
+                    print("STUCK at cop named:", cop["officer_first"] + " " + cop["officer_last"])
+                    i += 1
+                    stuckCounter = 0
         
 
     def write_json(self):
