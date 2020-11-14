@@ -32,9 +32,9 @@ class PoliceMisconductDataScraper():
         self.output_file = COPS_PICKLE_FILEPATH
         self.url = "https://projects.chicagoreporter.com/settlements/search/officers"
         options = Options()
-        #options.add_argument('--headless')
+        options.add_argument('--headless')
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
-        self.wait = WebDriverWait(self.driver, 5)
+        self.wait = WebDriverWait(self.driver, 2)
     
     def scrape_cops(self):
         self.driver.get(self.url)
@@ -46,7 +46,6 @@ class PoliceMisconductDataScraper():
         cops_as_web_elements = self.driver.find_elements_by_class_name('officer')
         for cop in cops_as_web_elements:
             page_url = cop.find_element_by_class_name('officer-link').get_attribute('href')
-            
             details = cop.text.split('\n')
             name = details[0]
             role = details[1]
@@ -56,9 +55,7 @@ class PoliceMisconductDataScraper():
     
     def scrape_active_status(self):
         for cop in self.cops:
-            #go to specific page to find active status
-            #TODO: move this into a separate block to avoid stale reference error
-            # but will need to ensure that I add the is_active prop to the correct cop element
+            #have to go to a cop's individual page to see years of active service
             self.driver.get(cop.page_url)
             length_of_service_text = self.driver.find_element_by_class_name('years-of-service').text
             cop.set_is_active('(active)' in length_of_service_text)

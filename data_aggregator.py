@@ -6,9 +6,10 @@ import requests
 
 from cop import Cop
 from scraper import scrape_police_misconduct_data, COPS_PICKLE_FILEPATH
+from validate_active_cops_from_cpdp import validate_active_cops_from_cpdp, ACTIVE_COPS_ALLEGATION_DATA_LIST
 
 COPS_WITH_DATA_PICKLE_FILEPATH = "data/cops_with_data.pickle"
-COPS_ALLEGATION_DATA_LIST = "data/cops_by_allegation.json"
+
 
 class Data():
     def __init__(self):
@@ -16,7 +17,7 @@ class Data():
         with open(COPS_PICKLE_FILEPATH, "rb") as handle:
             self.cops = pickle.load(handle)
         
-        with open(COPS_ALLEGATION_DATA_LIST, "r") as handle:
+        with open(ACTIVE_COPS_ALLEGATION_DATA_LIST, "r") as handle:
             self.officer_allegation_data_list = json.loads(handle.read())["officers"]
         self.officer_allegation_data = {}
 
@@ -51,6 +52,9 @@ class Data():
         #sort from highest to lowest misconduct payouts
         self.cops_with_payment_and_complaint_data = sorted(self.cops_with_payment_and_complaint_data, key= lambda cop: int(cop.total_payments), reverse=True)
 
+    def validate_active_cops_from_cpdp(self):
+        validate_active_cops_from_cpdp()
+
     def write_pickle(self):
         with open(self.output_file, "wb") as handle:
             pickle.dump(self.cops_with_payment_and_complaint_data, handle)
@@ -60,6 +64,8 @@ if __name__ == "__main__":
     #don't need to scrape police misconduct settlement data often because host is no longer updated
     if not os.path.isfile(COPS_PICKLE_FILEPATH):
         data.scrape_police_misconduct_settlement_data()
+        #we'll also verify the api data at this step, too
+        data.validate_active_cops_from_cpdp()
     data.get_officer_allegation_data()
     data.get_cops_with_payment_and_complaint_data()
     data.write_pickle()
