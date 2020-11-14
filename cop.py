@@ -6,6 +6,10 @@ class Cop():
         self.page_url: str = page_url #detailed page for individual cop, projects.chicagoreporter.com
         self.complaint_count: int = None
         self.is_active = is_active
+        self.complaint_page_url = "" #this won't be set until data_aggregator.py is called
+
+    def set_complaint_page_url(self, complaint_page_url):
+        self.complaint_page_url = complaint_page_url
 
     def set_is_active(self, is_active):
         self.is_active = is_active
