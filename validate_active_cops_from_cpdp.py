@@ -9,6 +9,8 @@ from selenium.webdriver.chrome.options import Options
 
 from webdriver_manager.chrome import ChromeDriverManager
 
+from tqdm import tqdm
+
 """
 Sadly, the API results from cpdp.co don't match the data that is hosted on their website
 We consider their website source of truth, not the API results, based on recency of data updates
@@ -54,6 +56,7 @@ class PoliceAllegationDataScraper():
     def update_allegation_data(self):
         #using a while loop to retry cops that hit a timeout during the get request
         i = 0
+        pbar = tqdm(total=len(self.active_officer_allegation_data_list))
         stuckCounter = 0 #skip one if we're stuck at a single row forever
         while i < len(self.active_officer_allegation_data_list):
             cop = self.active_officer_allegation_data_list[i]
@@ -74,12 +77,14 @@ class PoliceAllegationDataScraper():
                 #if not active, then we don't need to update allegations info
                 if not is_active:
                     cop["active"] = "No"
+                    i += 1
                     continue
 
                 allegations_count = int(self.driver.find_elements_by_class_name('metrics-pane-value')[0].text)
                 cop["allegations_count"] = allegations_count
                 i += 1
                 stuckCounter = 0
+                pbar.update(1)
             except:
                 stuckCounter += 1
                 if stuckCounter == 10:
@@ -90,7 +95,7 @@ class PoliceAllegationDataScraper():
         
 
     def write_json(self):
-        active_officers_list_to_obj = {"officers": self.active_officer_allegation_data_list}
+        active_officers_list_to_obj = {"officers": list(filter(lambda x: x["active"] == "Yes", self.active_officer_allegation_data_list))}
         active_officer_allegations_as_json = json.dumps(active_officers_list_to_obj)
         with open(ACTIVE_COPS_ALLEGATION_DATA_LIST, "w") as handle:
             handle.write(active_officer_allegations_as_json)

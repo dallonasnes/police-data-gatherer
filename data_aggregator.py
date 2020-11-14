@@ -14,17 +14,15 @@ COPS_WITH_DATA_PICKLE_FILEPATH = "data/cops_with_data.pickle"
 class Data():
     def __init__(self):
         self.output_file = COPS_WITH_DATA_PICKLE_FILEPATH
-        with open(COPS_PICKLE_FILEPATH, "rb") as handle:
-            self.cops = pickle.load(handle)
-        
-        with open(ACTIVE_COPS_ALLEGATION_DATA_LIST, "r") as handle:
-            self.officer_allegation_data_list = json.loads(handle.read())["officers"]
         self.officer_allegation_data = {}
 
     def scrape_police_misconduct_settlement_data(self):
         scrape_police_misconduct_data()
 
     def get_officer_allegation_data(self):
+        with open(ACTIVE_COPS_ALLEGATION_DATA_LIST, "r") as handle:
+            self.officer_allegation_data_list = json.loads(handle.read())["officers"]
+            
         for cop in self.officer_allegation_data_list:
             name = (cop['officer_first'] + " " + cop['officer_last']).upper()
             cop_details = {
@@ -35,6 +33,9 @@ class Data():
             self.officer_allegation_data[name] = cop_details
 
     def get_cops_with_payment_and_complaint_data(self):
+        with open(COPS_PICKLE_FILEPATH, "rb") as handle:
+            self.cops = pickle.load(handle)
+
         cops_with_payment_data = set([cop.name for cop in self.cops])
         cops_names_with_payment_and_complaint_data = cops_with_payment_data.intersection(set(self.officer_allegation_data.keys()))
 
