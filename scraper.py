@@ -1,5 +1,6 @@
 import os
 import pickle
+from datetime import datetime
 from time import sleep
 
 from selenium import webdriver
@@ -9,6 +10,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
 from webdriver_manager.chrome import ChromeDriverManager
+
+import dateutil
 
 from cop import Cop
 
@@ -27,12 +30,13 @@ def scrape_police_misconduct_data():
     finally:
         scraper.finish()
 
+
 class PoliceMisconductDataScraper():
     def __init__(self):
         self.output_file = COPS_PICKLE_FILEPATH
         self.url = "https://projects.chicagoreporter.com/settlements/search/officers"
         options = Options()
-        options.add_argument('--headless')
+        #options.add_argument('--headless')
         self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         self.wait = WebDriverWait(self.driver, 2)
     
@@ -52,6 +56,7 @@ class PoliceMisconductDataScraper():
             total_payments = int(details[2].split(' ')[0].split('$')[1].replace(',', ''))
 
             self.cops.append(Cop(name.upper(), role.upper(), total_payments, page_url))
+            break
     
     def scrape_active_status(self):
         for cop in self.cops:
@@ -59,6 +64,18 @@ class PoliceMisconductDataScraper():
             self.driver.get(cop.page_url)
             length_of_service_text = self.driver.find_element_by_class_name('years-of-service').text
             cop.set_is_active('(active)' in length_of_service_text)
+            #TODO: get start date for each cop
+            case_list = self.driver.find_element_by_id('officer-case-list')
+            cases_descs = case_list.find_elements_by_class_name('case-description')
+            case_payments = case_list.find_elements_by_class_name('case-payment-wrapper')
+            misconduct_events = {} #key: date, value: cost
+            for idx in range(len(cases_descs)):
+                detail_text = cases_descs[idx].find_element_by_class_name('case-details').text
+                date_of_incident = detail_text.split('\n')[3]
+                case_payments_detail_string = case_payments[idx].text
+                payment_amt = case_payments_detail_string.split('\n')[1]
+                misconduct_events[date_of_incident] = payment_amt
+
 
     def write_pickle(self):
         with open(self.output_file, "wb") as handle:

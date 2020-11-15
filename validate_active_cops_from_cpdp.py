@@ -20,6 +20,9 @@ Particular focus is on if a cop is still active and number of allegations
 Input: cops_by_allegation.json from CPDP API
 Output: active_cops_by_allegation.json
 
+TODO: can query current city employee db using this rest api
+although it is rate limited, need token to increase limt: https://data.cityofchicago.org/resource/xzkq-xp2w.json?name=BURAGE,%20%20LORRIE%20A
+Note there are two spaces after comma
 """
 UNVALIDATED_COPS_ALLEGATION_DATA_LIST = "data/unvalidated_cops_by_allegation.json"
 ACTIVE_COPS_ALLEGATION_DATA_LIST = "data/active_cops_by_allegation.json"
