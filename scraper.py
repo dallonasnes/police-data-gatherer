@@ -56,7 +56,6 @@ class PoliceMisconductDataScraper():
             total_payments = int(details[2].split(' ')[0].split('$')[1].replace(',', ''))
 
             self.cops.append(Cop(name.upper(), role.upper(), total_payments, page_url))
-            break
     
     def scrape_active_status(self):
         for cop in self.cops:
