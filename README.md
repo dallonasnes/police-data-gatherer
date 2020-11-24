@@ -1,22 +1,29 @@
 # Police Data Gatherer
 
-This project contains several files.
+This project has two components - scrapers that run periodically and a restful API that serves the scraped data.
 
-`Scraper.py` uses selenium to scrape police misconduct settlement data from ChicagoReporter's police misconduct settlement project.
-Their data is no longer actively updated so, once run, the pickled output `cops.pickle` is written to disk and from then can be treated as a static file.
-Running `scraper.py` requires chromedriver: `https://chromedriver.chromium.org/`
+## Local development
+Clone this repo. Then create a virtual environment and run `pip install -r requirements.txt`. You're all set. You can run the test suite with `pytest test_client.py` and spin up a local development server with `python api.py`
 
-`Data_Aggregator.py` reads in a json file populated with police complaint data from a `cpdp.co` endpoint. It then reads in `cops.pickle` and takes the intersection of the two read-in datasets to combine police misconduct settlement payout data with filed complaint data for each cop in the list. It writes the output as `cops_with_data.pickle`
+## Scrapers
+In the scrapers directory, `driver.py` orchestrates both scrapers. `misconduct_data_scraper.py` scrapes police misconduct data from ChicagoReporter investigation website. `complaint_data_scraper.py` scrapes complaint data from Cpdp.co. The driver kicks off both of these jobs, then builds a `Cop` object for each officer that stores merged and validated data. Finally, it serializes the collection of objects into a `cops_with_data.pickle` file stored in the `data` directory.
 
-`Api.py` is a `FastAPI` endpoint that serves GET requests over HTTP. On load, it reads `cops_with_data.pickle` and stores it as json in memory. It then serves this data for requests at `/cops` endpoint.
+Note that running scrapers requires local chromedriver setup: `https://chromedriver.chromium.org/`
 
-Usage is demonstrated in `test_client.py` which you can run with a `pytest` command in the root directory.
+## API Endpoint
+`api.py` is an endpoint that serves web and mobile clients. On load, it reads the most recent `cops_with_data.pickle` into memory. It responds to HTTP requests by filtering `cops_with_data` stored in memory.
 
 ## Data Sources:
+Police complaint data: `https://cpdp.co`
+Police misconduct settlement data: `https://projects.chicagoreporter.com/settlements/`
 
-Police complaint data: (REST API) `https://api.cpdp.co/api/v2/officers/top-by-allegation/`
+## Deployment
+Code formatters run on each commit, to enforce code style and readability. Integration test suite is run on each push.
 
-Police misconduct settlement data: `https://projects.chicagoreporter.com/settlements/search/officers`
+The `Procfile` instructs Heroku on how to start server. Heroku redeploys on every merge into `main` after integration test suite succeeds. Endpoint host is `police-data-gatherer.herokuapp.com`. Mobile endpoint path is `/cops`.
 
-## Deploy
-The `Procfile` instructs Heroku on how to start server. Heroku redeploys on every merge into `master` branch. Endpoint lives at `police-data-gatherer.herokuapp.com`
+## Future TODO
+1. A cron file to schedule jobs
+1. A Dockerfile to support running on different machines
+1. Get more CPD data to scrape
+1. Add more cities whose data is available
