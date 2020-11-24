@@ -17,8 +17,10 @@ Note that running scrapers requires local chromedriver setup: `https://chromedri
 Police complaint data: `https://cpdp.co`
 Police misconduct settlement data: `https://projects.chicagoreporter.com/settlements/`
 
-## Deploy
-The `Procfile` instructs Heroku on how to start server. Heroku redeploys on every merge into `main`. Endpoint host is `police-data-gatherer.herokuapp.com`. Mobile endpoint path is `/cops`.
+## Deployment
+Code formatters run on each commit, to enforce code style and readability. Integration test suite is run on each push.
+
+The `Procfile` instructs Heroku on how to start server. Heroku redeploys on every merge into `main` after integration test suite succeeds. Endpoint host is `police-data-gatherer.herokuapp.com`. Mobile endpoint path is `/cops`.
 
 ## Future TODO
 1. A cron file to schedule jobs
