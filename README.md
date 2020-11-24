@@ -15,6 +15,7 @@ Note that running scrapers requires local chromedriver setup: `https://chromedri
 
 ## Data Sources:
 Police complaint data: `https://cpdp.co`
+
 Police misconduct settlement data: `https://projects.chicagoreporter.com/settlements/`
 
 ## Deployment
