@@ -11,8 +11,6 @@ from selenium.webdriver.chrome.options import Options
 
 from webdriver_manager.chrome import ChromeDriverManager
 
-import dateutil
-
 # must add parent dir to python path to make Cop class visible
 import sys, inspect
 
