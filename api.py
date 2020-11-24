@@ -8,26 +8,33 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 
 from cop import Cop
-from data_aggregator import COPS_WITH_DATA_PICKLE_FILEPATH
+from data_gatherer import COPS_WITH_DATA_PICKLE_FILEPATH
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 
-#read pickled data into memory as a singleton
+# read pickled data into memory as a singleton
 with open(COPS_WITH_DATA_PICKLE_FILEPATH, "rb") as handle:
-    active_cops_with_data: List[Cop] = [cop.get_dict() for cop in pickle.load(handle) if cop.is_active]
+    active_cops_with_data: List[Cop] = [
+        cop.get_dict() for cop in pickle.load(handle) if cop.is_active
+    ]
 
-@app.get('/', response_class=HTMLResponse)
+
+@app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
-    return templates.TemplateResponse("frontend.html", {"request": request, "cops_with_data": active_cops_with_data})
+    return templates.TemplateResponse(
+        "frontend.html", {"request": request, "cops_with_data": active_cops_with_data}
+    )
 
-@app.get('/cops')
+
+@app.get("/cops")
 def cops():
     cops_with_data_as_json = jsonable_encoder(active_cops_with_data)
     return {"cops": cops_with_data_as_json}
 
-@app.get('/cops/{start_idx}/{count}')
+
+@app.get("/cops/{start_idx}/{count}")
 def cops_subset(start_idx: int, count: int):
     response = {"cops": []}
     end_idx = start_idx + count
