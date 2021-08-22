@@ -28,7 +28,7 @@ six==1.15.0
 starlette==0.13.6
 toml==0.10.1
 tqdm==4.50.0
-urllib3==1.25.10
+urllib3==1.26.6
 uvicorn==0.12.1
 webdriver-manager==3.2.2
 wmctrl==0.3
